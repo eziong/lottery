@@ -9,6 +9,7 @@ class LotteryBox extends React.Component {
             balls: Array(45).fill(false),
         };
         this.clickHandler = this.clickHandler.bind(this);
+        //this.randomSelect = this.randomSelect.bind(this);
     }
 
     clickHandler() {
@@ -35,8 +36,10 @@ class LotteryBox extends React.Component {
         );
     }
     render() {
+        console.log("rendering in LotteryBox");
         const mapToComponent = (numBalls) => {
             return numBalls.map((checked, i) => {
+                console.log(i + " : " + checked);
                 return <Ball number={i} key={i} checked={checked} />;
             });
         };
@@ -52,9 +55,6 @@ class LotteryBox extends React.Component {
 class Ball extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {
-            checked: props.checked,
-        };
         this.clickHandler = this.clickHandler.bind(this);
     }
     clickHandler() {
@@ -71,7 +71,7 @@ class Ball extends React.Component {
             <>
                 <div
                     className={
-                        this.state.checked ? "checkedball" : "uncheckedball"
+                        this.props.checked ? "checkedball" : "uncheckedball"
                     }
                     onClick={this.clickHandler}
                 >
