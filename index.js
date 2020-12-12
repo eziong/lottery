@@ -6,30 +6,61 @@ class LotteryBox extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            balls: Array(45).fill(false),
+            balls: Array(45)
+                .fill()
+                .map(function (value, index) {
+                    return index + 1;
+                }),
+            winningNums: Array(6).fill(),
+            drawing: false,
+            count: 0,
         };
         this.clickHandler = this.clickHandler.bind(this);
         //this.randomSelect = this.randomSelect.bind(this);
     }
 
     clickHandler() {
-        console.log("click");
-        const randomNum = [];
-        const balls = this.state.balls.slice();
-        randomNum.push(Math.ceil(Math.random() * 45));
-        randomNum.map((rd) => {
-            balls[rd] = !balls[rd];
-        });
-        this.setState({
-            balls: balls,
-        });
-        console.log("finish");
+        if (!this.state.drawing) {
+            this.setState({ drawing: true });
+            this.timer = setInterval(() => {
+                this.randomNumber();
+            }, 100);
+
+            setTimeout(() => {
+                clearTimeout(this.timer);
+                this.setState({ drawing: false });
+            }, 1000);
+        }
     }
 
+    randomNumber() {
+        var balls = this.state.balls.slice();
+        const count = this.state.count;
+        var pool = [];
+        var winningNums = [];
+        while (balls.length > 0) {
+            var pick = balls.splice(
+                Math.floor(Math.random() * balls.length),
+                1
+            )[0];
+            pool.push(pick);
+        }
+        for (var i = 0; i < 7; i++) {
+            var pick = pool.splice(
+                Math.floor(Math.random() * pool.length),
+                1
+            )[0];
+            winningNums.push(pick);
+        }
+        this.setState({ winningNums: winningNums, count: count + 1 });
+    }
     randomSelect() {
         return (
             <>
-                <div className="selectBtn" onClick={this.clickHandler}>
+                <div
+                    className={this.state.drawing ? "selectedBtn" : "selectBtn"}
+                    onClick={this.clickHandler}
+                >
                     자동 추첨
                 </div>
             </>
@@ -37,15 +68,20 @@ class LotteryBox extends React.Component {
     }
     render() {
         console.log("rendering in LotteryBox");
-        const mapToComponent = (numBalls) => {
-            return numBalls.map((checked, i) => {
-                console.log(i + " : " + checked);
-                return <Ball number={i} key={i} checked={checked} />;
+        const mapToComponent = (numBalls, winningNum) => {
+            return numBalls.map((i) => {
+                return (
+                    <Ball
+                        number={i}
+                        key={i}
+                        checked={winningNum.indexOf(i) > -1 ? true : false}
+                    />
+                );
             });
         };
         return (
             <div className="lotteryBox">
-                {mapToComponent(this.state.balls)}
+                {mapToComponent(this.state.balls, this.state.winningNums)}
                 {this.randomSelect()}
             </div>
         );
@@ -55,16 +91,6 @@ class LotteryBox extends React.Component {
 class Ball extends React.Component {
     constructor(props) {
         super(props);
-        this.clickHandler = this.clickHandler.bind(this);
-    }
-    clickHandler() {
-        console.log(this.state.checked);
-        this.setState((prevState) => ({
-            checked: !prevState.checked,
-        }));
-        /*this.setState({
-            checked: !this.state.checked,
-        });*/
     }
     render() {
         return (
@@ -73,15 +99,21 @@ class Ball extends React.Component {
                     className={
                         this.props.checked ? "checkedball" : "uncheckedball"
                     }
-                    onClick={this.clickHandler}
                 >
-                    {this.props.number + 1}
+                    {this.props.number}
                 </div>
             </>
         );
     }
 }
 
-class Lottery extends React.Component {}
+class Lottery extends React.Component {
+    constructor(props) {
+        super(props);
+    }
+    render() {
+        return <LotteryBox />;
+    }
+}
 
-ReactDOM.render(<LotteryBox />, document.getElementById("root"));
+ReactDOM.render(<Lottery />, document.getElementById("root"));
